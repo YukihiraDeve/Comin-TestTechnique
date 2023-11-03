@@ -6,6 +6,10 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../def';
 import {styles} from '../styles/StyleSheet'
 import { Image } from 'react-native';
+import { capitalizeFirstLetter } from '../utils/helper';
+
+const ITEMS_PER_PAGE = 20;
+const THRESHOLD = 0.75; 
 
 
 interface Pokemon {
@@ -28,6 +32,44 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   
+  const [offset, setOffset] = useState(0);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+
+  useEffect(() => {
+    fetchPokemon();
+    
+  }, [offset])
+
+
+
+  const fetchPokemon = async () => {
+    setIsFetchingMore(true);
+    try {
+      const data: PokemonListResponse = await getPokemonList(offset, ITEMS_PER_PAGE);
+      const detailedPokemons = await Promise.all(data.results.map(async (pokemon) => {
+        const details = await getPokemonDetails(pokemon.name);
+        return {
+          ...pokemon,
+          spriteURL: details.sprites.front_default
+        };
+      }));
+      setPokemons(prevPokemons => [...prevPokemons, ...detailedPokemons]);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsFetchingMore(false);
+    }
+  };
+
+
+
+const handleEndReached = () => {
+  if (!isFetchingMore) {
+    setOffset(prevOffset => prevOffset + ITEMS_PER_PAGE);
+  }
+};
+
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
 
@@ -61,8 +103,8 @@ const HomeScreen = () => {
       onPress={() => navigation.navigate('DetailScreen', { name: item.name })}
     >
       <Image source={{ uri: item.spriteURL }} style={styles.sprite} />
-      <Text>Number: {index + 1}</Text>
-      <Text>{item.name}</Text>
+      <Text>#{index + 1}</Text>
+      <Text>{capitalizeFirstLetter(item.name)}</Text>
     </TouchableOpacity>
   );
 
@@ -80,7 +122,16 @@ const HomeScreen = () => {
         keyExtractor={item => item.name}
         numColumns={3}
         columnWrapperStyle={{ justifyContent: 'space-between' }}
-        />
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={() => {
+          return (
+            isFetchingMore
+            ? <ActivityIndicator size="large" color="#0000ff" />
+            : null
+          );
+        }}>
+        </FlatList>
     </View>
   );
 };

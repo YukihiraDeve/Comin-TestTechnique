@@ -12,7 +12,7 @@ type PokemonListResponse = {
     }[];
   };
 
-  export const getPokemonList = async (limit: number = 20, offset: number = 0): Promise<PokemonListResponse> => {
+  export const getPokemonList = async (limit: number = 50, offset: number = 0): Promise<PokemonListResponse> => {
     try {
       const response = await fetch(`${BASE_URL}/pokemon?limit=${limit}&offset=${offset}`);
       if (!response.ok) {
