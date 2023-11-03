@@ -1,5 +1,7 @@
 # 🚀 Déploiement de l'application React Native avec Expo sur iOS
 
+Ce projet a été réalisé dans le cadre d'un test technique. Avant cela, je n'avais jamais travaillé avec React Native. Ce fut une occasion d'apprendre et de mettre en pratique mes compétences dans un nouvel environnement de développement.
+
 ## Prérequis:
 Node.js: Assurez-vous d'avoir Node.js installé sur votre machine. Vous pouvez le télécharger depuis ici.
 
